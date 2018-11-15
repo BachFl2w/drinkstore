@@ -10,7 +10,7 @@ class Product extends Model
 
     public function images()
     {
-        $this->hasMany(Image::class);
+        return $this->hasMany(Image::class);
     }
 
     public function feedbacks()

@@ -3,17 +3,30 @@
 namespace App\Http\Controllers;
 
 use Session;
+
 use App\User;
 use App\Role;
+use App\Repositories\Repository;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Http\Request;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserStoreRequest;
 
 class UserController extends Controller
 {
+    protected $userModel;
+    protected $roleModel;
+
+    public function __construct(User $userModel, Role $roleModel)
+    {
+        // set the model
+        $this->userModel = new Repository($userModel);
+        $this->roleModel = new Repository($roleModel);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -21,9 +34,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = User::all()->load('role');
-
-        // return response()->json($user);
+        $user = $this->userModel->all()->load('role');
 
         return view('admin.user_list', compact('user'));
     }
@@ -36,10 +47,10 @@ class UserController extends Controller
     public function create()
     {
         if (Auth::user()->role_id != 1) {
-            return back()->with('fail', __('You dont have permission'));
+            return back()->with('fail', __('You dont have permission !'));
         }
 
-        $roles = Role::all();
+        $roles = $this->roleModel->all();
 
         return view('admin.user_create', compact('roles'));
     }
@@ -52,10 +63,8 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        if ($request->role_id == 1 || $request->role_id == 2) {
-            $active   = 0;
-        } else {
-            $active   = 1;
+        if (Auth::user()->role_id == 1) {
+            return back()->with('fail', __('You dont have permission !'));
         }
 
         if ($request->hasFile('avatar')) {
@@ -63,29 +72,29 @@ class UserController extends Controller
             $name = $file->getClientOriginalName();
             $newName = str_random(4) . '_' . $name;
 
-            while (file_exists(config('image_path.avatar') . $newName)) {
+            while (file_exists(config('asset.image_path.avatar') . $newName)) {
                 $newName = str_random(4) . '_' . $name;
             }
 
-            $file->move(config('image_path.avatar'), $newName);
+            $file->move(config('asset.image_path.avatar'), $newName);
 
             $image = $newName;
         } else {
             $image = null;
         }
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+        $this->userModel->create([
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'phone'    => $request->phone,
-            'role_id'  => $request->role,
-            'active'   => $active,
-            'image'    => $image,
+            'address' => $request->address,
+            'phone' => $request->phone,
+            'role_id' => $request->role,
+            'active' => 1,
+            'image' => $image,
         ]);
 
-        return back()->with('success', __('Create user successfully !'));
+        return back()->with('success', __('Create successfully !'));
     }
 
     /**
@@ -96,23 +105,21 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return back()->with('fail', __('Can not find this account !'));
-        }
+        $user = User::findOrFail($id);
 
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1) {
+
             if ($user->role_id == 1 && $currentUser->email != $user->email) {
-                return back()->with('fail', __('You can not edit this account !'));
+                return back()->with('fail', __('You dont have permission !'));
             }
 
             return view('admin.user_edit', compact('user'));
         } else {
+
             if ($currentUser->email != $user->email) {
-                return back()->with('fail', __('You can not edit this account !'));
+                return back()->with('fail', __('You dont have permission !'));
             }
 
             return view('admin.user_edit', compact('user'));
@@ -123,30 +130,27 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(UserUpdateRequest $request, $id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1) {
             if ($user->role_id == 1 && $currentUser->email != $user->email) {
-                return back()->with('fail', __('You can not edit this account !'));
+                return back()->with('fail', __('You dont have permission !'));
             }
         } else {
             if ($currentUser->email != $user->email) {
-                return back()->with('fail', __('You can not edit this account !'));
+                return back()->with('fail', __('You dont have permission !'));
             }
         }
 
-        $user->name    = $request->name;
-        $user->address = $request->address;
-        $user->phone   = $request->phone;
+        $password = $user->password;
 
         if ($request->has('password')) {
-            $user->password = Hash::make($request->password);
+            $password = Hash::make($request->password);
         }
 
         if ($request->hasFile('avatar')) {
@@ -155,22 +159,34 @@ class UserController extends Controller
             $newName = str_random(4) . '_' . $name;
 
             // kiem tra de tranh trung lap ten file
-            while (file_exists(config('image_path.avatar') . $newName)) {
+            while (file_exists(config('asset.image_path.avatar') . $newName)) {
                 $newName = str_random(4) . '_' . $name;
             }
 
-            if (file_exists(config('image_path.avatar') . $user->image) && $user->image) {
-                unlink('images/avatar/' . $user->image);
+            if (file_exists(config('asset.image_path.avatar') . $user->image) && $user->image) {
+                unlink(config('asset.image_path.avatar') . $user->image);
             }
 
-            $file->move(config('image_path.avatar'), $newName);
-
-            $user->image = $newName;
+            $file->move(config('asset.image_path.avatar'), $newName);
+        } else {
+            $newName = null;
         }
+
+        $this->userModel->update(
+            [
+                'name' => $request->name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'image' => $newName,
+                'password' => $password,
+                'image' => $newName,
+            ],
+            $id
+        );
 
         $user->save();
 
-        return back()->with('success', __('Update user successfully !'));
+        return back()->with('success', __('Update successfully !'));
     }
 
     /**
@@ -181,13 +197,13 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1 && $user->role_id != 1) {
             $user->delete();
 
-            return back()->with('success', __('Delete user successfully !'));
+            return back()->with('success', __('Delete successfully !'));
         }
 
         return back()->with('fail', __('Dont have permission !'));
@@ -204,7 +220,7 @@ class UserController extends Controller
             return redirect('admin/user/index');
         }
 
-        return back()->with('fail', __('Email or password is true !'));
+        return back()->with('fail', __('Email or password is not true !'));
     }
 
     public function logoutAdmin()
@@ -212,12 +228,5 @@ class UserController extends Controller
         Auth::logout();
 
         return redirect(route('login'));
-    }
-
-    public function getDataJson()
-    {
-        $user = User::all();
-
-        return $user;
     }
 }
