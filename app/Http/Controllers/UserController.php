@@ -47,7 +47,7 @@ class UserController extends Controller
     public function create()
     {
         if (Auth::user()->role_id != 1) {
-            return back()->with('fail', __('You dont have permission !'));
+            return back()->with('fail', __('message.fail.permission'));
         }
 
         $roles = $this->roleModel->all();
@@ -64,7 +64,7 @@ class UserController extends Controller
     public function store(UserStoreRequest $request)
     {
         if (Auth::user()->role_id == 1) {
-            return back()->with('fail', __('You dont have permission !'));
+            return back()->with('fail', __('message.fail.permission'));
         }
 
         if ($request->hasFile('avatar')) {
@@ -94,7 +94,7 @@ class UserController extends Controller
             'image' => $image,
         ]);
 
-        return back()->with('success', __('Create successfully !'));
+        return back()->with('success', __('message.success.create'));
     }
 
     /**
@@ -103,23 +103,21 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(User $user)
     {
-        $user = User::findOrFail($id);
-
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1) {
 
             if ($user->role_id == 1 && $currentUser->email != $user->email) {
-                return back()->with('fail', __('You dont have permission !'));
+                return back()->with('fail', __('message.fail.permission'));
             }
 
             return view('admin.user_edit', compact('user'));
         } else {
 
             if ($currentUser->email != $user->email) {
-                return back()->with('fail', __('You dont have permission !'));
+                return back()->with('fail', __('message.fail.permission'));
             }
 
             return view('admin.user_edit', compact('user'));
@@ -132,18 +130,17 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function update(UserUpdateRequest $request, $id)
+    public function update(UserUpdateRequest $request, User $user)
     {
-        $user = User::findOrFail($id);
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1) {
             if ($user->role_id == 1 && $currentUser->email != $user->email) {
-                return back()->with('fail', __('You dont have permission !'));
+                return back()->with('fail', __('message.fail.permission'));
             }
         } else {
             if ($currentUser->email != $user->email) {
-                return back()->with('fail', __('You dont have permission !'));
+                return back()->with('fail', __('message.fail.permission'));
             }
         }
 
@@ -152,6 +149,8 @@ class UserController extends Controller
         if ($request->has('password')) {
             $password = Hash::make($request->password);
         }
+
+        $newName = null;
 
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
@@ -168,8 +167,6 @@ class UserController extends Controller
             }
 
             $file->move(config('asset.image_path.avatar'), $newName);
-        } else {
-            $newName = null;
         }
 
         $this->userModel->update(
@@ -184,9 +181,34 @@ class UserController extends Controller
             $id
         );
 
-        $user->save();
+        return back()->with('success', __('message.success.update'));
+    }
 
-        return back()->with('success', __('Update successfully !'));
+    public function active(User $user)
+    {
+        $currentUser = Auth::user();
+        $active = 0;
+
+        if ($currentUser->role_id == 1) {
+            if ($user->role_id == 1 && $user->active == 1) {
+                return back()->with('fail', __('message.fail.permission'));
+            }
+
+            if ($user->active == 0) {
+                $active = 1;
+            }
+        } else {
+            return back()->with('fail', __('message.fail.permission'));
+        }
+
+        $this->userModel->update(
+            [
+                'active' => $active,
+            ],
+            $user->id
+        );
+
+        return back()->with('success', __('message.success.update'));
     }
 
     /**
@@ -195,21 +217,20 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        $user = User::findOrFail($id);
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1 && $user->role_id != 1) {
             $user->delete();
 
-            return back()->with('success', __('Delete successfully !'));
+            return back()->with('success', __('message.success.delete'));
         }
 
-        return back()->with('fail', __('Dont have permission !'));
+        return back()->with('fail', __('message.fail.permission'));
     }
 
-    public function loginAdmin(Request $request)
+    public function login(Request $request)
     {
         $data = [
             'email' => $request->email,
@@ -217,16 +238,28 @@ class UserController extends Controller
         ];
 
         if (Auth::attempt($data)) {
+            if (Auth::user()->role_id == 3) {
+                return redirect('home');
+            }
+
             return redirect('admin/user/index');
         }
 
-        return back()->with('fail', __('Email or password is not true !'));
+        return back()->with('fail', __('message.fail.login'));
     }
 
     public function logoutAdmin()
     {
+
         Auth::logout();
 
         return redirect(route('login'));
+    }
+
+    public function logoutUser()
+    {
+        Auth::logout();
+
+        return redirect(route('home'));
     }
 }
