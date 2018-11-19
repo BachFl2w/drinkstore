@@ -14,9 +14,9 @@
 
 Auth::routes();
 
-Route::get('/', function() {
+Route::get('home', function() {
     return view('index');
-});
+})->name('home');
 
 Route::post('login_admin', 'UserController@loginAdmin')->name('admin.postLogin');
 
@@ -50,9 +50,9 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminLogin'], function() {
 
         Route::get('edit/{user}', 'UserController@edit')->name('admin.user.edit');
 
-        Route::post('update/{id}', 'UserController@update')->name('admin.user.update');
+        Route::post('update/{user}', 'UserController@update')->name('admin.user.update');
 
-        Route::get('/destroy/{id}', 'UserController@destroy')->name('admin.user.destroy');
+        Route::get('/destroy/{user}', 'UserController@destroy')->name('admin.user.destroy');
     });
 
     Route::group(['prefix' => 'feedback'], function() {
