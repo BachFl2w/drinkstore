@@ -1,0 +1,133 @@
+.images-container {
+    max-width: 1000px;
+    position: relative;
+    margin: auto;
+}
+
+.mySlides {
+    display: none;
+}
+
+.image-prev,
+.image-next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    margin-top: -22px;
+    padding: 7px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+}
+
+.image-next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.image-prev:hover,
+.image-next:hover {
+    background-color: #ffffff;
+}
+
+.text-cap {
+    color: #f2f2f2;
+    font-size: 15px;
+    padding: 8px 12px;
+    position: absolute;
+    bottom: 8px;
+    width: 100%;
+    text-align: center;
+}
+
+.numbertext {
+    color: #f2f2f2;
+    font-size: 12px;
+    padding: 8px 12px;
+    position: absolute;
+    top: 0;
+}
+
+.model-big {
+    max-width: 1100px;
+}
+
+.detail-element {
+    padding: 20px 0px;
+}
+
+.detail-element-product_name {
+    font-size: 20px
+}
+
+.detail-element-label_quantity {
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 1px;
+}
+
+.detail-element-input_quantity {
+    height: 32px;
+    border-radius: 0px;
+    padding-right: 5px;
+    padding-left: 5px;
+    text-align: center;
+    width: 35px;
+    border-color: #3490dc;
+}
+
+.detail-element-label_topping {
+    padding-bottom: 10px;
+}
+
+.detail-element-topping_name {
+    background-color: #ADFF2F;
+    padding: 4px;
+    border-radius: 5px;
+    color: #800000;
+    font-weight: 600;
+}
+
+.detail-element-topping-element {
+    margin-bottom: 10px;
+    padding-right: 4%;
+}
+
+.detail-element-label_total {
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 1px;
+}
+
+.detail-element-total {
+    color: #fe3834;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.detail-element-tag-delete {
+    border: 0;
+    color: #007ff0;
+    font-size: 10px;
+    margin-right: 30px;
+    position: static;
+    padding: 0;
+    font-size: 2em;
+}
+.quantity-down {
+    height: 32px;
+    width: 30px;
+    padding: 0px 5px;
+    border-right: 0px;
+    border-radius: 5px 0px 0px 5px;
+}
+.quantity-up {
+    height: 32px;
+    width: 30px;
+    padding: 0px 5px;
+    border-left: 0px;
+    border-radius: 0px 5px 5px 0px;
+}

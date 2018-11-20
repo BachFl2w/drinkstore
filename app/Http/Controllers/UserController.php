@@ -63,7 +63,7 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        if (Auth::user()->role_id == 1) {
+        if (Auth::user()->role_id != 1) {
             return back()->with('fail', __('message.fail.permission'));
         }
 
@@ -146,11 +146,11 @@ class UserController extends Controller
 
         $password = $user->password;
 
-        if ($request->has('password')) {
+        if ($request->password != '') {
             $password = Hash::make($request->password);
         }
 
-        $newName = null;
+        $newName = $user->image;
 
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
