@@ -33,12 +33,12 @@ return [
         'statistics' => 'Statistics',
         'method' => 'How we work',
         'search' => 'Easy to search',
-        'search_placeholder' => 'Enter product or category ...',
+        'searchPlaceholder' => 'Enter product or category ...',
         'feedback' => 'Send me feedback',
         'pay' => 'Convinient Pay',
         'criteria' => 'Criteria',
         'delivery' => 'Express delivery',
-        'delivery_time' => 'Delivery time',
+        'deliveryTime' => 'Delivery time',
         'best' => 'Best selling',
         'popular' => 'Popular',
         'count' => 'More :number user using',
@@ -47,6 +47,7 @@ return [
         'restaurant' => 'Submit your Restaurant',
         'driver' => 'We are looking for a Driver',
         'rotating' => 'Quality,Express delivery,Fair Price',
+        'takeAway' => 'Take away',
     ],
 
     // sucess
@@ -66,10 +67,21 @@ return [
     ],
 
     'create' => 'Create',
+    'edit' => 'Edit',
+    'profile_card' => 'Profile Card',
+    'baseInfo' => 'Base infomation',
     'update' => 'Update',
     'delete' => 'Delete',
+    'list' => 'List',
+    'detail' => 'Detail',
+    'status' => 'Status',
     'action' => 'Action',
+    'active' => 'Active',
     'submit' => 'Submit',
+    'reply' => 'Reply',
+    'cancel' => 'Cancel',
+    'readmore' => 'Read more',
+    'content' => 'Content',
 
     // User
     'login' => 'Login',
@@ -77,6 +89,11 @@ return [
     'register' => 'Register',
     'user' => 'User',
     'name' => 'Name',
+    'change' => [
+        'avatar' => 'Change Avatar',
+        'password' => 'Change Password',
+        'new_pass' => 'New Password',
+    ],
     'profile' => 'Profile',
     'avatar' => 'Avatar',
     'email' => 'E-Mail Address',
@@ -89,6 +106,7 @@ return [
         'reset' => 'Reset Password',
         'send.reset' => 'Send Password Reset Link',
     ],
+    'rePassword' => 'Re-Password',
     'remember' => 'Remember Me',
     'verify' => [
         'verify' => 'Verify Your Email Address',
@@ -101,6 +119,7 @@ return [
 
     // Role
     'role' => 'Role',
+    'permission' => 'Permission',
 
     // Category
     'category' => 'Category',
@@ -112,4 +131,9 @@ return [
 
     'product' => 'Product',
     'order' => 'Order',
+    'listOrder' => 'List Order',
+    'orderDetail' => 'Order detail',
+    'timeReceive' => 'Time receive',
+    'addressReceive' => 'Address receive',
+    'note' => 'Note',
 ];
