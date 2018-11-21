@@ -16,7 +16,6 @@ class UsersTableSeeder extends Seeder
                 'name' => 'Nguyen Chi',
                 'email' => 'nnchi1998@gmail.com',
                 'phone' => str_random(10),
-                'image' => config('asset.image_path.default_user'),
                 'password' => bcrypt('123456'),
                 'address' => strtolower(str_random(20)),
                 'role_id' => 1,
@@ -25,7 +24,6 @@ class UsersTableSeeder extends Seeder
                 'name' => 'Bach Nguyen',
                 'email' => 'bach@gmail.com',
                 'phone' => str_random(10),
-                'image' => config('asset.image_path.default_user'),
                 'password' => bcrypt('123456'),
                 'address' => strtolower(str_random(20)),
                 'role_id' => 1,
@@ -36,7 +34,6 @@ class UsersTableSeeder extends Seeder
             $user = [
                 'name' => str_random(6),
                 'phone' => str_random(10),
-                'image' => config('asset.image_path.default_user'),
                 'email' => strtolower(str_random(6)) . '@gmail.com',
                 'password' => bcrypt('123456'),
                 'address' => strtolower(str_random(20)),
