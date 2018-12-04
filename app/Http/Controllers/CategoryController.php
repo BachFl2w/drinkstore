@@ -25,9 +25,9 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categoriesData = Category::all();
+        $categories = Category::all();
 
-        return view('admin.category_list', compact('categoriesData'));
+        return view('admin.category_list', compact('categories'));
     }
 
     /**
@@ -37,7 +37,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.category_create');
     }
 
     /**
@@ -52,9 +52,7 @@ class CategoryController extends Controller
             'name' => $request->name,
         ]);
 
-        return reqspone()->json([
-            'success' => __('Store category successfully !')
-        ]);
+        return redirect()->route('admin.category.index');
     }
 
     /**
@@ -76,7 +74,9 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
-        //
+        $category = $this->categoryModel->show($id);
+
+        return view('admin.category_update', compact('category'));
     }
 
     /**
@@ -90,11 +90,11 @@ class CategoryController extends Controller
     {
         Category::findOrFail($id);
 
-        $this->categoryModel->update($request->name, $id);
+        $this->categoryModel->update([
+            'name' => $request->name
+        ], $id);
 
-        return reqspone()->json([
-            'success' => __('Update category successfully !')
-        ]);
+        return redirect()->route('admin.category.index');
     }
 
     /**
@@ -109,15 +109,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return reqspone()->json([
-            'success' => __('Update category successfully !')
-        ]);
-    }
-
-    public function getDataJson()
-    {
-        $categoriesData = Category::all();
-
-        return $categoriesData;
+        return redirect()->route('admin.category.index');
     }
 }

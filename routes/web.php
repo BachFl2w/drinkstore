@@ -14,10 +14,6 @@
 
 Auth::routes();
 
-Route::get('home', function() {
-    return view('index');
-})->name('home');
-
 Route::post('login_admin', 'UserController@login')->name('admin.postLogin');
 
 Route::group(['prefix' => 'admin', 'middleware' => 'adminLogin'], function() {
@@ -93,7 +89,11 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminLogin'], function() {
 
         Route::get('index', 'CategoryController@index')->name('admin.category.index');
 
+        Route::get('create', 'CategoryController@create')->name('admin.category.create');
+
         Route::post('store', 'CategoryController@store')->name('admin.category.store');
+
+        Route::get('edit/{id}', 'CategoryController@edit')->name('admin.category.edit');
 
         Route::post('update/{id}', 'CategoryController@update')->name('admin.category.update');
 
