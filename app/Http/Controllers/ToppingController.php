@@ -6,11 +6,11 @@ use App\Topping;
 use App\Repositories\Repository;
 use Illuminate\Http\Request;
 
-class TopingController extends Controller
+class ToppingController extends Controller
 {
     protected $toppingModel;
 
-    public function __construct(Role $toppingModel)
+    public function __construct(Topping $toppingModel)
     {
         // set the model
         $this->toppingModel = new Repository($toppingModel);
@@ -23,7 +23,9 @@ class TopingController extends Controller
      */
     public function index()
     {
-        return view('admin.topping_list');
+        $toppings = $this->toppingModel->all();
+
+        return view('admin.topping_list', compact('toppings'));
     }
 
     /**
@@ -33,13 +35,13 @@ class TopingController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.topping_create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -50,13 +52,13 @@ class TopingController extends Controller
             'quantity' => $request->quantity,
         ]);
 
-        return response()->json(['success' => __('Store successfully !')]);
+        return redirect()->route('admin.topping.index');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -67,54 +69,44 @@ class TopingController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        //
+        $topping = $this->toppingModel->show($id);
+
+        return view('admin.topping_update', compact('topping'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
-        Topping::findOrFail($id);
+        $this->toppingModel->update([
+            'name' => $request->name,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+        ], $id);
 
-        $this->toppingModel->update(
-            [
-                'name' => $request->name,
-                'price' => $request->price,
-                'quantity' => $request->quantity,
-            ],
-            $id
-        );
-
-        return response()->json(['success' => __('Update successfully !')]);
+        return redirect()->route('admin.topping.index');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        Topping::findOrFail($id)->delete();
+        $this->toppingModel->delete($id);
 
-        return response()->json(['success' => __('Delete successfully !')]);
-    }
-
-    public function getDataJson()
-    {
-        $dataTopping = Topping::all();
-
-        return $dataTopping;
+        return redirect()->route('admin.topping.index');
     }
 }

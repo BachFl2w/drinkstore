@@ -30,14 +30,15 @@ class Repository implements RepositoryInterface
     // update record in the database
     public function update(array $data, $id)
     {
-        $record = $this->findOrFail($id);
+        $record = $this->model->findOrFail($id);
+
         return $record->update($data);
     }
 
     // remove record from the database
     public function delete($id)
     {
-        return $this->model->destroy($id);
+        return $this->model->findOrFail($id)->delete();
     }
 
     // show the record with the given id
@@ -56,6 +57,7 @@ class Repository implements RepositoryInterface
     public function setModel($model)
     {
         $this->model = $model;
+
         return $this;
     }
 
