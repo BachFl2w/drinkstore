@@ -85,8 +85,6 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminLogin'], function() {
 
     Route::group(['prefix' => 'category'], function() {
 
-        Route::get('json', 'CategoryController@getDataJson')->name('admin.category.json');
-
         Route::get('index', 'CategoryController@index')->name('admin.category.index');
 
         Route::get('create', 'CategoryController@create')->name('admin.category.create');
@@ -102,17 +100,17 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminLogin'], function() {
 
     Route::group(['prefix' => 'topping'], function() {
 
-        Route::get('json', 'TopingController@getDataJson')->name('admin.topping.json');
+        Route::get('index', 'ToppingController@index')->name('admin.topping.index');
 
-        Route::get('index', 'TopingController@index')->name('admin.topping.index');
+        Route::get('create', 'ToppingController@create')->name('admin.topping.create');
 
-        Route::post('store', 'TopingController@store')->name('admin.topping.store');
+        Route::post('store', 'ToppingController@store')->name('admin.topping.store');
 
-        Route::post('update/{id}', 'TopingController@update')->name('admin.topping.update');
+        Route::get('edit/{id}', 'ToppingController@edit')->name('admin.topping.edit');
 
-        Route::get('destroy/{id}', 'TopingController@destroy')->name('admin.topping.destroy');
+        Route::post('update/{id}', 'ToppingController@update')->name('admin.topping.update');
 
-        Route::get('show/{id}', 'TopingController@show')->name('admin.topping.show');
+        Route::get('destroy/{id}', 'ToppingController@destroy')->name('admin.topping.destroy');
     });
 
     Route::group(['prefix' => 'order'], function() {

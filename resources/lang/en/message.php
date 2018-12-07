@@ -136,4 +136,9 @@ return [
     'timeReceive' => 'Time receive',
     'addressReceive' => 'Address receive',
     'note' => 'Note',
+    //admin topping
+    'id' => 'ID',
+    'topping' => 'Topping',
+    'price' => 'Price',
+    'quantity' => 'Quantity',
 ];

@@ -38,7 +38,7 @@ class Repository implements RepositoryInterface
     // remove record from the database
     public function delete($id)
     {
-        return $this->model->destroy($id);
+        return $this->model->findOrFail($id)->delete();
     }
 
     // show the record with the given id
