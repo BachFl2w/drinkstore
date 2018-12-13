@@ -3,10 +3,30 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
+    use SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'receiver',
+        'user_id',
+        'order_place',
+        'order_phone',
+        'order_time',
+        'status',
+        'note',
+    ];
+
     protected $table = 'orders';
+
+    protected $dates = ['deleted_at'];
 
     public function orderDetails()
     {

@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use Session;
+use Cache;
+use Redis;
 
 use App\User;
 use App\Role;
 use App\Repositories\Repository;
+
+use Yajra\Datatables\Datatables;
+use Pusher\Pusher;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +27,6 @@ class UserController extends Controller
 
     public function __construct(User $userModel, Role $roleModel)
     {
-        // set the model
         $this->userModel = new Repository($userModel);
         $this->roleModel = new Repository($roleModel);
     }
@@ -34,25 +38,22 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = $this->userModel->all()->load('role');
-
-        return view('admin.user_list', compact('user'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        if (Auth::user()->role_id != 1) {
-            return back()->with('fail', __('message.fail.permission'));
-        }
-
         $roles = $this->roleModel->all();
 
-        return view('admin.user_create', compact('roles'));
+        return view('admin.user_list', compact('roles'));
+    }
+
+    public function json()
+    {
+        if (!Redis::get('user:all')) {
+            // $name, $with from repository
+            $this->userModel->setRedisAll('user:all', ['role']);
+        }
+
+        // set true to return array
+        $data = json_decode(Redis::get('user:all'), true);
+
+        return datatables($data)->make(true);
     }
 
     /**
@@ -63,8 +64,9 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        if (Auth::user()->role_id == 1) {
-            return back()->with('fail', __('message.fail.permission'));
+        if (Auth::user()->role_id != 1) {
+            // return __('message.fail.create');
+            abort(403);
         }
 
         if ($request->hasFile('avatar')) {
@@ -83,7 +85,7 @@ class UserController extends Controller
             $image = null;
         }
 
-        $this->userModel->create([
+        $user = $this->userModel->create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -94,34 +96,25 @@ class UserController extends Controller
             'image' => $image,
         ]);
 
-        return back()->with('success', __('message.success.create'));
+        // $name, $with
+        $this->userModel->setRedisAll('user:all', ['role']);
+        // $name, $id, $data
+        $this->userModel->setRedisById('user:' . $user->id, $user);
+
+        return 'success';
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * edit my profile
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user)
+    public function edit()
     {
-        $currentUser = Auth::user();
+        $user = Auth::user();
 
-        if ($currentUser->role_id == 1) {
-
-            if ($user->role_id == 1 && $currentUser->email != $user->email) {
-                return back()->with('fail', __('message.fail.permission'));
-            }
-
-            return view('admin.user_edit', compact('user'));
-        } else {
-
-            if ($currentUser->email != $user->email) {
-                return back()->with('fail', __('message.fail.permission'));
-            }
-
-            return view('admin.user_edit', compact('user'));
-        }
+        return view('admin.user_edit', compact('user'));
     }
 
     /**
@@ -136,21 +129,21 @@ class UserController extends Controller
 
         if ($currentUser->role_id == 1) {
             if ($user->role_id == 1 && $currentUser->email != $user->email) {
-                return back()->with('fail', __('message.fail.permission'));
+                abort(403);
             }
         } else {
             if ($currentUser->email != $user->email) {
-                return back()->with('fail', __('message.fail.permission'));
+                abort(403);
             }
         }
 
         $password = $user->password;
 
-        if ($request->has('password')) {
+        if ($request->password != '') {
             $password = Hash::make($request->password);
         }
 
-        $newName = null;
+        $newName = $user->image;
 
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
@@ -169,7 +162,7 @@ class UserController extends Controller
             $file->move(config('asset.image_path.avatar'), $newName);
         }
 
-        $this->userModel->update(
+        $data = $this->userModel->update(
             [
                 'name' => $request->name,
                 'address' => $request->address,
@@ -178,37 +171,39 @@ class UserController extends Controller
                 'password' => $password,
                 'image' => $newName,
             ],
-            $id
+            $user->id
         );
 
-        return back()->with('success', __('message.success.update'));
+        $this->userModel->setRedisAll('user:all', ['role']);
+        $this->userModel->setRedisById('user:' . $user->id, $data);
+
+        return __('message.success.update');
     }
 
     public function active(User $user)
     {
         $currentUser = Auth::user();
-        $active = 0;
 
         if ($currentUser->role_id == 1) {
             if ($user->role_id == 1 && $user->active == 1) {
-                return back()->with('fail', __('message.fail.permission'));
-            }
+                abort(403);
+            } else {
+                $data = $this->userModel->update(['active' => $user->active == 1 ? 0 : 1], $user->id);
 
-            if ($user->active == 0) {
-                $active = 1;
+                $this->userModel->setRedisAll('user:all', ['role']);
+                $this->userModel->setRedisById('user' . $user->id, User::where('id', $user->id)->get());
+
+                $check = ($user->active == 1 ? 0 : 1);
+
+                if ($check == 0) {
+                    return response()->json($user);
+                }
+
+                return 'actived';
             }
-        } else {
-            return back()->with('fail', __('message.fail.permission'));
         }
 
-        $this->userModel->update(
-            [
-                'active' => $active,
-            ],
-            $user->id
-        );
-
-        return back()->with('success', __('message.success.update'));
+        abort(403);
     }
 
     /**
@@ -222,12 +217,15 @@ class UserController extends Controller
         $currentUser = Auth::user();
 
         if ($currentUser->role_id == 1 && $user->role_id != 1) {
+            $this->userModel->setRedisAll('user:all', ['role']);
+            $this->userModel->deleteRedis('user' . $user->id);
+
             $user->delete();
 
-            return back()->with('success', __('message.success.delete'));
+            return __('message.success.delete');
         }
 
-        return back()->with('fail', __('message.fail.permission'));
+        abort(403);
     }
 
     public function login(Request $request)
@@ -239,10 +237,10 @@ class UserController extends Controller
 
         if (Auth::attempt($data)) {
             if (Auth::user()->role_id == 3) {
-                return redirect('home');
+                return redirect(route('client.index'));
             }
 
-            return redirect('admin/user/index');
+            return redirect()->route('admin.index');
         }
 
         return back()->with('fail', __('message.fail.login'));
@@ -260,6 +258,6 @@ class UserController extends Controller
     {
         Auth::logout();
 
-        return redirect(route('home'));
+        return redirect(route('client.index'));
     }
 }
