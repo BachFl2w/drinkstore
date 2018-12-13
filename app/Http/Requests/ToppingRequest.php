@@ -24,7 +24,7 @@ class ToppingRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|max:200|unique:users',
+            'name' => 'required|max:200|unique:topping,name,' . $this->route('toppping'),
             'price' => 'required|numeric',
             'quantity' => 'required|numeric|min:1',
         ];

@@ -24,7 +24,7 @@ class SizeRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|min:1|max:5|unique:size',
+            'name' => 'required|min:1|max:5|unique:size,name' . $this->route('size'),
             'percent' => 'required|numberic',
         ];
     }
